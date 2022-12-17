@@ -54,7 +54,7 @@ adam = Adam(learning_rate=0.001)
 model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Train model and collect history
-history = model.fit(x=training_set, epochs=1, validation_data=testing_set)
+history = model.fit(x=training_set, epochs=15, validation_data=testing_set)
 
 # Extract training and validation loss and accuracy
 train_loss = history.history['loss']

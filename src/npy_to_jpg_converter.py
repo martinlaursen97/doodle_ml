@@ -37,14 +37,15 @@ class NpyToJpgConverter:
         create_paths_if_not_exists(data_path, training_dir, testing_dir)
 
     @time_function
-    def download_npy_files(self, categories):
+    def download_npy_files(self, url, categories):
         for category in categories:
             path = f'{self.data_path}/{category}.npy'
             if not os.path.exists(path):
-                urllib.request.urlretrieve(
-                    f'https://storage.googleapis.com/quickdraw_dataset/full/numpy_bitmap/{category}.npy',
+                local_filename, headers = urllib.request.urlretrieve(
+                    f'{url}/{category}.npy',
                     path
                 )
+                print(f'Download complete: {local_filename}')
 
     @time_function
     def convert_and_save_images(self):
@@ -103,10 +104,11 @@ if __name__ == '__main__':
     IMG_WIDTH = 28
     IMG_HEIGHT = 28
     CATEGORIES = ['cat', 'axe', 'bicycle', 'skull', 'rainbow', 'tree', 'zigzag', 'cake']
+    URL = 'https://storage.googleapis.com/quickdraw_dataset/full/numpy_bitmap'
 
     converter = NpyToJpgConverter(DATA_PATH, TRAINING_PATH, TESTING_PATH, NUM_TRAINING_IMAGES, NUM_TESTING_IMAGES,
                                   IMG_WIDTH, IMG_HEIGHT)
 
     converter.clear_unused_files(CATEGORIES)
-    converter.download_npy_files(CATEGORIES)
+    converter.download_npy_files(URL, CATEGORIES)
     converter.convert_and_save_images()
