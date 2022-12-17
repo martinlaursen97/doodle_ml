@@ -98,11 +98,11 @@ if __name__ == '__main__':
     DATA_PATH = '../data'
     TRAINING_PATH = f'{DATA_PATH}/training'
     TESTING_PATH = f'{DATA_PATH}/testing'
-    NUM_TRAINING_IMAGES = 100
-    NUM_TESTING_IMAGES = 10
+    NUM_TRAINING_IMAGES = 7000
+    NUM_TESTING_IMAGES = 1000
     IMG_WIDTH = 28
     IMG_HEIGHT = 28
-    CATEGORIES = ['cat']
+    CATEGORIES = ['cat', 'axe', 'bicycle', 'skull', 'rainbow', 'tree', 'zigzag', 'cake']
 
     converter = NpyToJpgConverter(DATA_PATH, TRAINING_PATH, TESTING_PATH, NUM_TRAINING_IMAGES, NUM_TESTING_IMAGES,
                                   IMG_WIDTH, IMG_HEIGHT)
