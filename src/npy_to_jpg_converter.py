@@ -48,8 +48,7 @@ class NpyToJpgConverter:
                 print(f'Download complete: {local_filename}')
 
     @time_function
-    def convert_and_save_images(self):
-        categories = tuple(fn[:-4] for fn in os.listdir(self.data_path) if fn.endswith('npy'))
+    def convert_and_save_images(self, categories):
 
         for category in categories:
             category_training_dir_path = f'{self.training_dir}/{category}'
@@ -111,4 +110,4 @@ if __name__ == '__main__':
 
     converter.clear_unused_files(CATEGORIES)
     converter.download_npy_files(URL, CATEGORIES)
-    converter.convert_and_save_images()
+    converter.convert_and_save_images(CATEGORIES)
