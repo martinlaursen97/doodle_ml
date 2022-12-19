@@ -49,12 +49,15 @@ model.add(Dense(64, activation='relu'))
 num_classes = len([fn for fn in os.listdir(DATA_PATH) if fn.endswith('.npy')])
 model.add(Dense(num_classes, activation='softmax'))
 
+# Show model layers
+model.summary()
+
 # Compile model
 adam = Adam(learning_rate=0.001)
 model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Train model and collect history
-history = model.fit(x=training_set, epochs=15, validation_data=testing_set)
+history = model.fit(x=training_set, epochs=10, validation_data=testing_set)
 
 # Extract training and validation loss and accuracy
 train_loss = history.history['loss']

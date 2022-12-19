@@ -82,10 +82,12 @@ class NpyToJpgConverter:
 
     @time_function
     def clear_unused_files(self, categories):
+        # Clear unused npy files
         for file in os.listdir(self.data_path):
             if file.endswith('.npy') and file[:-4] not in categories:
                 os.remove(f'{self.data_path}/{file}')
 
+        # Clear unused directories
         for folder in [self.training_dir, self.testing_dir]:
             for file in os.listdir(folder):
 
@@ -93,12 +95,27 @@ class NpyToJpgConverter:
                 if file not in categories:
                     shutil.rmtree(file_path)
 
+        # Clear invalid test images
+        removed_count = 0
+
+        for category in categories:
+            test_dir_path = f'{self.testing_dir}/{category}'
+            for img in os.listdir(test_dir_path):
+                num_img = int(img.split('.')[0])
+
+                if num_img < self.train_amount or num_img > self.train_amount + self.test_amount:
+                    img_path = f'{test_dir_path}/{img}'
+                    os.remove(img_path)
+                    removed_count += 1
+
+        print(f'Removed {removed_count} invalid test images')
+
 
 if __name__ == '__main__':
     DATA_PATH = '../data'
     TRAINING_PATH = f'{DATA_PATH}/training'
     TESTING_PATH = f'{DATA_PATH}/testing'
-    NUM_TRAINING_IMAGES = 7000
+    NUM_TRAINING_IMAGES = 10000
     NUM_TESTING_IMAGES = 1000
     IMG_WIDTH = 28
     IMG_HEIGHT = 28

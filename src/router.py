@@ -13,7 +13,7 @@ model = load_model('doodle.h5')
 
 @app.route('/predict', methods=["POST"])
 def predict():
-    data = [float(i) for i in request.get_data().decode().split(',') if i != '']
+    data = [float(i)/255 for i in request.get_data().decode().split(',') if i != '']
     data = np.array([[data]])
     data = data.reshape((400, 400))
 
