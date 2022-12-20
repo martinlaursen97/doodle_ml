@@ -17,33 +17,33 @@ predict()
 
 // Drawing functions
 const continueStroke = newPoint => {
-    context.beginPath();
-    context.moveTo(latestPoint[0], latestPoint[1]);
-    context.strokeStyle = colour;
-    context.lineWidth = strokeWidth;
-    context.lineCap = "round";
-    context.lineJoin = "round";
-    context.lineTo(newPoint[0], newPoint[1]);
-    context.stroke();
+  context.beginPath();
+  context.moveTo(latestPoint[0], latestPoint[1]);
+  context.strokeStyle = colour;
+  context.lineWidth = strokeWidth;
+  context.lineCap = "round";
+  context.lineJoin = "round";
+  context.lineTo(newPoint[0], newPoint[1]);
+  context.stroke();
 
-    latestPoint = newPoint;
+  latestPoint = newPoint;
 
 };
 
 // Event helpers
 
 const startStroke = point => {
-    drawing = true;
-    latestPoint = point;
+  drawing = true;
+  latestPoint = point;
 };
 
 const getTouchPoint = evt => {
-    if (!evt.currentTarget) {
-        return [0, 0];
-    }
-    const rect = evt.currentTarget.getBoundingClientRect();
-    const touch = evt.targetTouches[0];
-    return [touch.clientX - rect.left, touch.clientY - rect.top];
+  if (!evt.currentTarget) {
+    return [0, 0];
+  }
+  const rect = evt.currentTarget.getBoundingClientRect();
+  const touch = evt.targetTouches[0];
+  return [touch.clientX - rect.left, touch.clientY - rect.top];
 };
 
 const BUTTON = 0b01;
@@ -53,55 +53,55 @@ const mouseButtonIsDown = buttons => (BUTTON & buttons) === BUTTON;
 // Event handlers
 
 const mouseMove = evt => {
-    if (!drawing) {
-        return;
-    }
-    continueStroke([evt.offsetX, evt.offsetY]);
+  if (!drawing) {
+    return;
+  }
+  continueStroke([evt.offsetX, evt.offsetY]);
 };
 
 const mouseDown = evt => {
-    if (drawing) {
-        return;
-    }
-    evt.preventDefault();
-    canvas.addEventListener("mousemove", mouseMove, false);
-    startStroke([evt.offsetX, evt.offsetY]);
+  if (drawing) {
+    return;
+  }
+  evt.preventDefault();
+  canvas.addEventListener("mousemove", mouseMove, false);
+  startStroke([evt.offsetX, evt.offsetY]);
 };
 
 const mouseEnter = evt => {
-    if (!mouseButtonIsDown(evt.buttons) || drawing) {
-        return;
-    }
-    mouseDown(evt);
+  if (!mouseButtonIsDown(evt.buttons) || drawing) {
+    return;
+  }
+  mouseDown(evt);
 };
 
 const endStroke = async evt => {
 
-    if (!drawing) {
-        return;
-    }
-    await predict()
-    drawing = false;
-    evt.currentTarget.removeEventListener("mousemove", mouseMove, false);
+  if (!drawing) {
+    return;
+  }
+  await predict()
+  drawing = false;
+  evt.currentTarget.removeEventListener("mousemove", mouseMove, false);
 };
 
 const touchStart = evt => {
-    if (drawing) {
-        return;
-    }
-    evt.preventDefault();
-    startStroke(getTouchPoint(evt));
+  if (drawing) {
+    return;
+  }
+  evt.preventDefault();
+  startStroke(getTouchPoint(evt));
 };
 
 const touchMove = evt => {
-    if (!drawing) {
-        return;
-    }
-    continueStroke(getTouchPoint(evt));
+  if (!drawing) {
+    return;
+  }
+  continueStroke(getTouchPoint(evt));
 };
 
 const touchEnd = evt => {
-    drawing = false;
+  drawing = false;
 };
 
 // Register event handlers
@@ -115,84 +115,87 @@ canvas.addEventListener("mouseup", endStroke, false);
 canvas.addEventListener("mouseout", endStroke, false);
 canvas.addEventListener("mouseenter", mouseEnter, false);
 
-async function predict() {
-    let imgData = context.getImageData(0, 0, 400, 400);
+const ctx = document.getElementById("myChart").getContext("2d");
 
-    let input = []
-
-    for (let i = 3; i < imgData.data.length; i += 4) {
-        input.push(imgData.data[i])
-    }
-
-    let data = {
-        'data': input
-    }
-
-    const fetchOptions = {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
+const chart = new Chart(ctx, {
+  type: "bar",
+  data: {
+    labels: [],
+    datasets: [
+      {
+        backgroundColor: [],
+        data: [],
+      },
+    ],
+  },
+  options: {
+    scales: {
+      yAxes: [
+        {
+          ticks: {
+            max: 1,
+            min: 0.0,
+          },
         },
-        body: input
-    };
+      ],
+    },
+    legend: {
+      display: false,
+      labels: {
+        font: {
+          size: 14,
+        },
+      },
+    },
+    title: {
+      display: true,
+      text: "Predictions",
+    },
+  },
+});
 
-    const res = fetch("http://127.0.0.1:5000/predict", fetchOptions).then(function (response) {
-        return response.text();
-    }).then(function (text) {
-        obj = JSON.parse(text)
-        pred = obj.predictions
+async function predict() {
+  const imgData = context.getImageData(0, 0, 400, 400);
 
-        var xValues = [];
-        var yValues = [];
-        var barColors = [];
+  const input = [];
 
-        for (const key in pred) {
-            if (pred.hasOwnProperty(key)) {
-                xValues.push(key)
-                yValues.push(pred[key])
+  for (let i = 3; i < imgData.data.length; i += 4) {
+    input.push(imgData.data[i]);
+  }
 
+  const fetchOptions = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: input,
+  };
 
-                barColors.push("black");
-            }
-        }
+  const res = await fetch("http://127.0.0.1:5000/predict", fetchOptions);
+  const text = await res.text();
+  const obj = JSON.parse(text);
+  const pred = obj.predictions;
 
-        new Chart("myChart", {
-            type: "bar",
-            data: {
-                labels: xValues,
-                datasets: [{
-                    backgroundColor: barColors,
-                    data: yValues
-                }]
-            },
-            options: {
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            max: 1,
-                            min: 0.0
-                        }
-                    }]
-                },
-                legend: {
-                    display: false,
-                    labels: {
+  const xValues = [];
+  const yValues = [];
+  const barColors = [];
 
-                        font: {
-                            size: 14
+  Object.keys(pred).forEach((key) => {
+    result = pred[key]
+    xValues.push(key);
+    yValues.push(result);
 
-                        }
-                    }
-                },
-                title: {
-                    display: true,
-                    text: "Predictions"
-                }
-            }
-        });
-    });
+    RGB = Math.max(0, 255 - result * 3 * 255);
+
+    barColors.push(`rgb(${RGB}, ${RGB}, ${RGB})`)
+  });
+
+  chart.data.labels = xValues;
+  chart.data.datasets[0].data = yValues;
+  chart.data.datasets[0].backgroundColor = barColors
+  chart.update();
 }
 
 function clear() {
-    location.reload();
+  context.clearRect(0, 0, canvas.width, canvas.height);
 }

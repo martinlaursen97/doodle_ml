@@ -100,13 +100,15 @@ class NpyToJpgConverter:
 
         for category in categories:
             test_dir_path = f'{self.testing_dir}/{category}'
-            for img in os.listdir(test_dir_path):
-                num_img = int(img.split('.')[0])
 
-                if num_img < self.train_amount or num_img > self.train_amount + self.test_amount:
-                    img_path = f'{test_dir_path}/{img}'
-                    os.remove(img_path)
-                    removed_count += 1
+            if os.path.exists(test_dir_path):
+                for img in os.listdir(test_dir_path):
+                    num_img = int(img.split('.')[0])
+
+                    if num_img < self.train_amount or num_img > self.train_amount + self.test_amount:
+                        img_path = f'{test_dir_path}/{img}'
+                        os.remove(img_path)
+                        removed_count += 1
 
         print(f'Removed {removed_count} invalid test images')
 
